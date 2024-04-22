@@ -39,7 +39,7 @@ elf_paths;
 %% select folder to process
 %EVERY folder should contain a file called "brackets.info" with the number of
 %the first and the last image in the bracket (I think in chronological order)
-% so if the first backet contained 5 images, and the second one was three
+% so if the first bracket contained 5 images, and the second one was three
 % brackets.info would have the contents
 % 1 5
 % 6 9
@@ -49,15 +49,7 @@ if ~exist('inputfolder','var')
 else %if the user has specificed an inputfolder, make that the root directory
     para = elf_para(inputfolder);
 end
-% this step never did anything, let the user select the folder
-    % if ~exist('skydir','var')
-    %     skydir = fullfile(getenv('HOME'),'/Documents/Starry Project/Light Pollution Imaging/');
-    % end
-    % if ~exist('filename','var')
-    %     inputfolder = fullfile(skydir,'LPexper-20181127-LowMWay-Thornwood');
-    % end
 %don't be surprised if you get asked for the top folder
-% para = elf_para('20181127StarryThornwood_1928_1940');
 %find datasets in the folder
 [~, ~, datasets] = elf_checkdata(para);
 nohor = NaN(1, 4);%for now let's keep the horizon.
@@ -67,8 +59,7 @@ nohor = NaN(1, 4);%for now let's keep the horizon.
 warning('off','imageio:tiffmexutils:libtiffWarning')%I don't think this is relevant
 for i = 1:length(datasets)%[3 6]%
     dataset = datasets{i};
-%     night_HDRscenes_quickfixJJF(dataset, nohor(i));%difficulty getting calibration right
-    elf_main1_HdrAndInt(dataset, '*dng',false, 90)
+    elf_main1_HdrAndInt(dataset, '*dng',false, 00)%TODO check for rotation here
     night_filter(dataset); close all
 end
 warning('on','imageio:tiffmexutils:libtiffWarning')%turn it back on for other steps
