@@ -31,10 +31,10 @@ function one_view(inputfolder)
 %---    --- --- --- 	---%%%
 %% add all the functions needed
 filePath = matlab.desktop.editor.getActiveFilename; %path to this file
-addpath(fullfile(fileparts(filePath),'jochensmolka-elf-461d23388273'));
-addpath(fullfile(fileparts(filePath),'ELF4LP'));
-addpath(fullfile(fileparts(filePath),'kakearney-cptcmap-pkg-845bf83'));
-addpath(fullfile(fileparts(filePath),'altmany-export_fig-3175417'));
+addpath(genpath(fullfile(fileparts(filePath),'jochensmolka-elf-461d23388273')));
+addpath(genpath(fullfile(fileparts(filePath),'ELF4LP')));
+addpath(genpath(fullfile(fileparts(filePath),'kakearney-cptcmap-pkg-845bf83')));
+addpath(genpath(fullfile(fileparts(filePath),'altmany-export_fig-3175417')));
 elf_paths;
 %% select folder to process
 %EVERY folder should contain a file called "brackets.info" with the number of
@@ -43,6 +43,7 @@ elf_paths;
 % brackets.info would have the contents
 % 1 5
 % 6 9
+% the numbers in each row must be separated by tabs, not spaces
 if ~exist('inputfolder','var')
     %if no inputfolder has been specified, get the user to select one
     para = elf_para('%');
