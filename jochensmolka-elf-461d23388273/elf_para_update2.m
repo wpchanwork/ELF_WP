@@ -1,4 +1,4 @@
-function para = elf_para_update(para)
+function para = elf_para_update2(para)
 
 %% Combine old parameter file with potentially changed information in current elf_para
 oldpara        = elf_readwrite(para, 'loadpara');             % loads the old para file (which contains projection information, too)
