@@ -35,7 +35,8 @@ infosum     = elf_readwrite(para, 'loadinfosum');                          % loa
                     elf_support_logmsg('      Processing %d scenes in environment %s\n', length(fnames_im), dataset);
                  
 %% Set Filtering scales (specific for Milky Way)
-para.ana.scales_deg = [2 4 8 16];
+para.ana.scales_deg = [2 4 8 3];
+keyscale = 4; % the key scale that will be visualized and saved
                     
 %% Process one scene at a time
 it = 1;
@@ -52,13 +53,13 @@ for setnr = 1:length(fnames_im)
               text(0.5, 0.5, 'HDR image (delinearised for display)', 'units', 'normalized', 'position', [0 0.5], 'rotation', 90, 'horizontalalignment', 'center', 'verticalalignment', 'middle', 'fontweight', 'bold');
               axis(ah1, [0 1 0 1], 'off');
               
-    % panel 2: 1 deg filtered image
+    % panel 2: 2 deg filtered image
     p2      = uipanel('Parent', fh, 'Position', [0 0 .5 1/3]);
-    ah(1)   = axes('Parent', p2, 'Position', [0 0 1 1]);
+    ah(1)   = axes('Parent', p2, 'Position', [0 0 1 1]); % the first scale in the para.ana.scales_deg
     
-    % panel 3: 10 deg filtered image
+    % panel 3: 3 deg filtered image
     p3      = uipanel('Parent', fh, 'Position', [0.5 0 .5 1/3]);
-    ah(2)   = axes('Parent', p3, 'Position', [0 0 1 1]); 
+    ah(2)   = axes('Parent', p3, 'Position', [0 0 1 1]);  % the second scale in the para.ana.scales_deg
             axis(ah(1:2), 'off');
             set(fh, 'Name', sprintf('Scene #%d of %d', setnr, length(allfiles)));
             drawnow;
@@ -77,19 +78,29 @@ for setnr = 1:length(fnames_im)
     %% save projected and filtered images
     elf_readwrite(para, 'savefilt_mat', sprintf('scene%03d', setnr), im_filt_HDR);
 
-    % indat = im_filt_HDR;
-    im_filt_HDR = elf_readwrite(para, 'loadfilt_mat', sprintf('scene%03d', setnr));
-    data = elf_wrap_rgb(im_filt_HDR{2});                 % This directly reflect which scale in para.ana.scales_deg is picked
-    intMean = elf_analysis_datasetmean(data, [], 1, 'logmean');
+    [~,f]       = fileparts(fnames_im{setnr});
+
+    % save visualization
+    % Get the displayed images
+    panelID = 2 -mod(keyscale, 2);
+    hImg10 = findobj(ah(panelID), 'Type', 'image');
+    blur10 = hImg10(end).CData;     % the second scale in the para.ana.scales_deg filtered pixels
     
-    [~,f]       = fileparts(fnames_im{setnr}); 
-    outstat = fullfile(para.paths.datapath, para.paths.filtfolder, [f '.csv']);
+    % Save with no white border (PNG). Normalize if needed.
+    imwrite(normalize8(blur10), fullfile(para.paths.datapath, para.paths.filtfolder, sprintf('%s_blur%g.png', f, para.ana.scales_deg(keyscale))));
+
+    %Calculate summary
+    im_filt_HDR = elf_readwrite(para, 'loadfilt_mat', sprintf('scene%03d', setnr));
+    data = elf_wrap_rgb(im_filt_HDR{keyscale});                 % This directly reflect which scale in para.ana.scales_deg is picked
+    intMean = elf_analysis_datasetmean(data, [], 1, 'logmean');
+        
+    outstat = fullfile(para.paths.datapath, para.paths.filtfolder, sprintf('%s_blur%g.csv', f, para.ana.scales_deg(keyscale)));
     elf_analysis_writestats(intMean, outstat);
 
     meanIm  = elf_io_readwrite(para, 'loadHDR_tif', fnames_im{setnr});
     h = elf_plot_intSummary_elev(intMean, meanIm, infosum);
     
-    para.paths.fname_meanivep_jpg = fullfile(para.paths.outputfolder_pub, [f '_summary.jpg']);
+    para.paths.fname_meanivep_jpg = fullfile(para.paths.outputfolder_pub, sprintf('%s_blur%g_summary.jpg', f, para.ana.scales_deg(keyscale)));
     elf_io_readwrite(para, 'savemeanivep_jpg', '', h.fh);
 end
     
